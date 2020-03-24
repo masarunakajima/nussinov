@@ -61,29 +61,31 @@ bool zero_size_hairpin_allowed = MIN_HAIRPIN_SIZE < 1;
 
 size_t nu(const int * nseq, const size_t len, pair_int *base_pairs){
   int *ptrN, **N, *ptrL, **L;
-  int matrix_size = len + 2;
+  int matrix_size = len + 1;  //  Extra row and column for convenience in dynamic programming.
   int size = sizeof(int *) * matrix_size + sizeof(int) * matrix_size * matrix_size;
   // Initialize 2D matrices N and L
+  // N value to substring S[i:j] is stored in N[i+1, j+1]
   N = (int **)malloc(size);
   ptrN = (int *)(N + matrix_size);
   for(int i = 0; i < matrix_size; i++)
     N[i] = (ptrN + matrix_size * i);
 
+  // L value to substring S[i:j] is stored in L[i+1, j+1]
   L = (int **)malloc(size);
   ptrL = (int *)(L + matrix_size);
   for(int i = 0; i < matrix_size; i++)
     L[i] = (ptrL + matrix_size * i);
 
-  for (int i = 1; i < matrix_size - 1; i++){
+  // Initialize N and L matrices.
+  for (int i = 1; i < matrix_size; i++){
     N[i][i-1] = 0;
     N[i][i] = 0;
     L[i][i] = -1;
   }
-  N[matrix_size-1][matrix_size-2] = 0;
   int new_N = 0;
   int max_N = 0;
 
-  for (int j = 2; j < matrix_size - 1; j++){
+  for (int j = 2; j < matrix_size; j++){
     for (int i = j-1; i >= 1; i--){
       max_N = N[i][j-1];  // base j is not paired
       L[i][j] = -1;

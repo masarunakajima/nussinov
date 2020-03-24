@@ -145,25 +145,22 @@ int main(int argc, char *argv[]) {
   size_t len = 0;
   ssize_t seq_len;
   fp = fopen(path, "r");
-  if (fp == NULL)
-    {
-      perror("Error while opening the file.\n");
-      exit(EXIT_FAILURE);
-    }
+  if (fp == NULL){
+    perror("Error while opening the file.\n");
+    exit(EXIT_FAILURE);
+  }
 
-  seq_len = getline (&seq, &len, fp);
+  seq_len = getline(&seq, &len, fp);
   if (seq[seq_len - 1] == '\n') seq_len--;
   fclose(fp);
   int *nseq = (int *)malloc(sizeof(int) * (seq_len));
-  for (size_t i = 0; i < seq_len; i++){
-    nseq[i] = b2n(toupper(seq[i]));
-  }
+  for (size_t i = 0; i < seq_len; i++) nseq[i] = b2n(toupper(seq[i]));
   pair_int *base_pairs = (pair_int *)malloc(sizeof(pair_int) * (seq_len) / 2);
   size_t num_pairs = nu(nseq, seq_len, base_pairs);  // Run Nussinov's algorithm.
   free(nseq);
 
   fp = fopen(outpath, "w");
-  fprintf(fp, "%d\n",num_pairs);
+  fprintf(fp, "%d\n", num_pairs);
   for (int i = 0; i < num_pairs; i++){
     fprintf (fp, "%d %d\n", base_pairs[i].first,base_pairs[i].second);
   }

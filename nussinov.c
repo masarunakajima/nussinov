@@ -1,4 +1,4 @@
-
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -6,7 +6,7 @@
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define MIN_HAIRPIN_SIZE 3
-
+#define MAX_SEQ_LEN 50000
 
 
 
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
   char *path = argv[1];
   char *outpath = argv[2];
   FILE *fp;
-  char *seq;
+  char *seq = (char *)malloc(sizeof(char) * MAX_SEQ_LEN);
   size_t len = 0;
   ssize_t seq_len;
   fp = fopen(path, "r");
@@ -151,16 +151,23 @@ int main(int argc, char *argv[]) {
     perror("Error while opening the file.\n");
     exit(EXIT_FAILURE);
   }
-
-  seq_len = getline(&seq, &len, fp);
+  if( fgets (seq, MAX_SEQ_LEN, fp) == NULL) {
+    perror("Error while reading the file.\n");
+    exit(EXIT_FAILURE);
+  }
+  seq_len = strlen(seq);
   if (seq[seq_len - 1] == '\n') seq_len--;
   fclose(fp);
   int *nseq = (int *)malloc(sizeof(int) * (seq_len));
+  // Convert sequence to numbers
   for (size_t i = 0; i < seq_len; i++) nseq[i] = b2n(toupper(seq[i]));
+  free(seq);
+  // set to store maximum number of base pairs.
   pair_int *base_pairs = (pair_int *)malloc(sizeof(pair_int) * (seq_len) / 2);
-  size_t num_pairs = nu(nseq, seq_len, base_pairs);  // Run Nussinov's algorithm.
+  // Run Nussinov's algorithm.
+  size_t num_pairs = nu(nseq, seq_len, base_pairs);
   free(nseq);
-
+  // Output the results
   fp = fopen(outpath, "w");
   fprintf(fp, "%d\n", num_pairs);
   for (int i = 0; i < num_pairs; i++){
